@@ -1,6 +1,15 @@
 function love.load()
     math.randomseed(os.time())
 
+    --Audio
+    sounds = {}
+    sounds.hit=love.audio.newSource("sounds/hit1.mp3", "static")
+
+
+
+    -- Colores originales
+    r, g, b, a = love.graphics.getColor()
+
     -- Cargar sprites
     sprites = {}
     sprites.background = love.graphics.newImage('sprites/background.png')
@@ -11,10 +20,11 @@ function love.load()
 
     -- Inicializar jugador
     player = {}
+    velocidadOriginal = 500
     player.sprite = sprites.player
     player.x = love.graphics.getWidth() / 2
     player.y = love.graphics.getHeight() / 2
-    player.speed = 180
+    player.speed = velocidadOriginal
     player.orientation = 0
     player.hp = 10
     player.damage = 10
@@ -36,6 +46,8 @@ function love.load()
 
     -- Inicializar variables de juego
     gameFont = love.graphics.newFont(40)
+    -- gameState 1 es partida por comenzar
+    -- gameState 2 es partida ya iniciada
     gameState = 1
     maxWerewolfTime = 2
     werewolfTimer = 2
@@ -72,6 +84,7 @@ function love.update(dt)
         if playerDamageTimer <= 0 and player.canTakeDmg == false then
             player.canTakeDmg = true
             playerDamageTimer = 0.2
+            player.speed = velocidadOriginal
         end
 
         if playerDamageTimer > 0 then
@@ -90,6 +103,12 @@ function love.draw()
 
     if gameState == 1 then
         love.graphics.printf("Click anywhere to begin!", 0, love.graphics.getHeight() / 2, love.graphics.getWidth(), "center")
+    end
+
+    if player.canTakeDmg == false then
+        love.graphics.setColor(1, 0, 0)
+    else
+        love.graphics.setColor(r, g, b, a)
     end
 
     love.graphics.draw(player.sprite, player.x, player.y, player.orientation, nil, nil, offsets.playerX, offsets.playerY)
@@ -164,6 +183,8 @@ function handleCollisions()
                 player.hp = player.hp - 1
                 playerDamageTimer = 0.4
                 player.canTakeDmg = false
+                player.speed = (player.speed)*1.5
+                sounds.hit:play()
             end
 
             if player.hp == 0 then

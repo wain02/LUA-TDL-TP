@@ -17,6 +17,22 @@ Semana 13 de Mayo
 Semana 20 de Mayo
 
 To Do:
-- Federico: Agregar vida al personaje y comportamiento cuando se muere un zombie.
-- Wain: PowerUps variados dentro del juego.
-- Rodrigo: Editar zombies y agregar comportamiento cuando se reciben ataques de zombies.
+
+- Agregar niveles
+
+Federico: 
+    - Agregar vida al personaje
+    - Comportamiento cuando se muere un zombie.
+Wain: 
+    - PowerUps variados dentro del juego.
+Rodrigo: 
+    - Editar zombies 
+    - Agregar comportamiento cuando se reciben ataques de zombies.
+    - Agregar primeros sonidos dentro del juego
+
+Propuestas:
+
+- PoweUp: Lanzallamas
+- PowerUp: Invulnerabilidad tipo mario bross
+- Reducir visibilidad
+- Crear modulos para cada clase/tabla
