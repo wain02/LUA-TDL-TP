@@ -1,11 +1,16 @@
+local Werewolf = require("Werewolf")
+
 function love.load()
     math.randomseed(os.time())
 
     --Audio
-    sounds = {}
-    sounds.hit=love.audio.newSource("sounds/hit1.mp3", "static")
-
-
+    hitSounds = {}
+    hitSounds.hit=love.audio.newSource("sounds/hit1.mp3", "static")
+    hitSounds.hitTwo=love.audio.newSource("sounds/hit2.mp3", "static")
+    love.audio.setVolume(0.3, hitSounds)
+    powerUpSounds = {}
+    powerUpSounds.wow=love.audio.newSource("sounds/wow.mp3", "static")
+    love.audio.setVolume(0.5, powerUpSounds)
 
     -- Colores originales
     r, g, b, a = love.graphics.getColor()
@@ -184,7 +189,7 @@ function handleCollisions()
                 playerDamageTimer = 0.4
                 player.canTakeDmg = false
                 player.speed = (player.speed)*1.5
-                sounds.hit:play()
+                playHitSound(hitSounds)
             end
 
             if player.hp == 0 then
@@ -235,6 +240,7 @@ function handleBulletWound(bullet, werewolf)
 end
 
 function handlePowerUp(player, p)
+    -- p.sound:play()
     player.sprite = sprites.player
     player.damage = 20
     p.dead = true
@@ -249,15 +255,7 @@ function werewolfPlayerAngle(werewolf)
 end
 
 function spawnWerewolf()
-    local werewolf = {}
-    werewolf.x = math.random(0, love.graphics.getWidth())
-    werewolf.y = math.random(0, love.graphics.getHeight())
-    werewolf.speed = 140
-    werewolf.health = 10
-    werewolf.dead = false
-    werewolf.scaleFactor = 0.2
-    werewolf.score = 1
-
+    local werewolf = Werewolf:new()
     table.insert(werewolves, werewolf)
 end
 
@@ -284,4 +282,12 @@ end
 
 function distanceBetween(x1, y1, x2, y2)
     return math.sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2)
+end
+
+function playHitSound(hitSounds)
+    if math.random(0,1)<0.5 then
+        hitSounds.hit:play()
+    else
+        hitSounds.hitTwo:play()
+    end
 end
