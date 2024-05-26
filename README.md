@@ -23,7 +23,7 @@ To Do:
 Federico: 
     - Agregar vida al personaje
     - Comportamiento cuando se muere un zombie.
-Wain: 
+Martin: 
     - Agregar Rifle Napalm Shotgun.
     - Modularizar
 Rodrigo: 
