@@ -8,16 +8,15 @@ function Napalm:new()
     
     -- Inicializamos las propiedades de la instancia
     instance.x = math.random(0, love.graphics.getWidth())
-    instance.y = math.random(0, love.graphics.getHeight())
-    Werewolf 
+    instance.y = math.random(0, love.graphics.getHeight()) 
     -- Retornamos la instancia
     return instance
 end
 
 -- método de la clase
-function Shotgun:myMethod()
+function Napalm:myMethod()
     print("Property1: " .. self.posicionX)
     print("Property2: " .. self.posicionY)
 end
 
-return Shotgun
+return Napalm

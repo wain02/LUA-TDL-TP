@@ -1,4 +1,7 @@
 local Werewolf = require("Werewolf")
+local Rifle =  require("Rifle")
+local Shotgun =  require("Shotgun")
+local Napalm =  require("Napalm")
 
 function love.load()
     math.randomseed(os.time())
@@ -21,7 +24,8 @@ function love.load()
     sprites.bullet = love.graphics.newImage('sprites/bullet.png')
     sprites.player = love.graphics.newImage('sprites/player.png')
     sprites.werewolf = love.graphics.newImage('sprites/werewolf.png')
-    sprites.powerUp = love.graphics.newImage('sprites/powerup.png')
+    sprites.powerUps = love.graphics.newImage('sprites/powerup.png') 
+    sprites.rifle = love.graphics.newImage('sprites/rifle.png') 
 
     -- Inicializar jugador
     player = {}
@@ -59,6 +63,10 @@ function love.load()
     playerDamageTimer = 0
     score = 0
     gameTimer = 300
+
+    rifleTimer =  5
+    
+    
 end
 
 function love.update(dt)
@@ -95,6 +103,16 @@ function love.update(dt)
         if playerDamageTimer > 0 then
             playerDamageTimer = playerDamageTimer - dt
         end
+
+
+        if rifleTimer <= 0 then  
+            spawnRifle(dt)
+            rifleTimer  = 10
+        end
+        if rifleTimer > 0 then
+            rifleTimer = rifleTimer - dt
+        end
+
     end
 end
 
@@ -257,6 +275,20 @@ end
 function spawnWerewolf()
     local werewolf = Werewolf:new()
     table.insert(werewolves, werewolf)
+end
+
+function spawnRifle()
+    local rifle = Rifle:new(sprites.rifle)
+
+    table.insert(powerUps, rifle)
+end
+function spawnShotgun()
+    local shotgun = Shotgun:new()
+    table.insert(powerUps, shotgun)
+end
+function spawnNaplm()
+    local napalm = Napalm:new()
+    table.insert(powerUps, napalm)
 end
 
 function spawnBullet()

@@ -25,8 +25,8 @@ function Shotgun:myMethod()
     print("Property2: " .. self.posicionY)
 end
 
-function SilverBullet()
+--function SilverBullet()
     
 
 
-return {}
+return ShotGun
