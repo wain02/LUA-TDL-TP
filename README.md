@@ -24,7 +24,8 @@ Federico:
     - Agregar vida al personaje
     - Comportamiento cuando se muere un zombie.
 Wain: 
-    - PowerUps variados dentro del juego.
+    - Agregar Rifle Napalm Shotgun.
+    - Modularizar
 Rodrigo: 
     - Editar zombies 
     - Agregar comportamiento cuando se reciben ataques de zombies.
