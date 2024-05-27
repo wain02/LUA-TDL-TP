@@ -26,6 +26,7 @@ function love.load()
     sprites.werewolf = love.graphics.newImage('sprites/werewolf.png')
     sprites.powerUps = love.graphics.newImage('sprites/powerup.png') 
     sprites.rifle = love.graphics.newImage('sprites/rifle.png') 
+    sprites.napalm = love.graphics.newImage('sprites/napalm.png')
 
     -- Inicializar jugador
     player = {}
@@ -65,6 +66,9 @@ function love.load()
     gameTimer = 300
 
     rifleTimer =  5
+
+    rifleTimer =  5
+    napalmTimer = 5
     
     
 end
@@ -111,6 +115,14 @@ function love.update(dt)
         end
         if rifleTimer > 0 then
             rifleTimer = rifleTimer - dt
+        end
+
+        if napalmTimer <= 0 then  
+            spawnNapalm(dt)
+            napalmTimer  = 10
+        end
+        if napalmTimer > 0 then
+            napalmTimer = napalmTimer - dt
         end
 
     end
@@ -286,8 +298,10 @@ function spawnShotgun()
     local shotgun = Shotgun:new()
     table.insert(powerUps, shotgun)
 end
-function spawnNaplm()
-    local napalm = Napalm:new()
+
+function spawnNapalm()
+    local napalm = Napalm:new(sprites.napalm)
+    --werewolfs = {}              --si el personaje agarra la napalm mueren los werefolfs
     table.insert(powerUps, napalm)
 end
 
