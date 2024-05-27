@@ -33,7 +33,7 @@ Rodrigo:
 
 Propuestas:
 
-- PoweUp: Lanzallamas
-- PowerUp: Invulnerabilidad tipo mario bross
+- PoweUp: Rifle, Napalm, etc
+- PowerUp: mas daño de las balas, poder de matar todos los werewolfs
 - Reducir visibilidad
 - Crear modulos para cada clase/tabla
