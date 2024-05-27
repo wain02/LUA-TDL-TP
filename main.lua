@@ -20,12 +20,13 @@ function love.load()
 
     -- Cargar sprites
     sprites = {}
+	sprites.blood = love.graphics.newImage('sprites/blood.png')
     sprites.background = love.graphics.newImage('sprites/background.png')
     sprites.bullet = love.graphics.newImage('sprites/bullet.png')
     sprites.player = love.graphics.newImage('sprites/player.png')
     sprites.werewolf = love.graphics.newImage('sprites/werewolf.png')
-    sprites.powerUps = love.graphics.newImage('sprites/powerup.png') 
-    sprites.rifle = love.graphics.newImage('sprites/rifle.png') 
+    sprites.powerUps = love.graphics.newImage('sprites/powerup.png')
+    sprites.rifle = love.graphics.newImage('sprites/rifle.png')
     sprites.napalm = love.graphics.newImage('sprites/napalm.png')
 
     -- Inicializar jugador
@@ -44,6 +45,13 @@ function love.load()
     werewolves = {}
     bullets = {}
     powerUps = {}
+
+	-- Crear el sistema de partículas de sangre
+    bloodParticles = love.graphics.newParticleSystem(sprites.blood, 100)
+    bloodParticles:setParticleLifetime(0.5, 1) -- Las partículas vivirán entre 0.5 y 1 segundos.
+    bloodParticles:setLinearAcceleration(-200, -200, 200, 200) -- Aceleración de las partículas.
+    bloodParticles:setSizes(0.5, 1) -- Tamaños de las partículas.
+    bloodParticles:setColors(1, 0, 0, 1, 1, 0, 0, 0) -- De rojo sólido a transparente.
 
     -- Inicializar offsets para centrado de sprites
     offsets = {}
@@ -69,8 +77,8 @@ function love.load()
 
     rifleTimer =  5
     napalmTimer = 5
-    
-    
+
+
 end
 
 function love.update(dt)
@@ -79,6 +87,7 @@ function love.update(dt)
     handleBulletsMovement(dt)
     handleCollisions()
     despawnBullets()
+	bloodParticles:update(dt)
 
     if gameState == 2 then
         if gameTimer > 0 then
@@ -109,7 +118,7 @@ function love.update(dt)
         end
 
 
-        if rifleTimer <= 0 then  
+        if rifleTimer <= 0 then
             spawnRifle(dt)
             rifleTimer  = 10
         end
@@ -117,7 +126,7 @@ function love.update(dt)
             rifleTimer = rifleTimer - dt
         end
 
-        if napalmTimer <= 0 then  
+        if napalmTimer <= 0 then
             spawnNapalm(dt)
             napalmTimer  = 10
         end
@@ -159,6 +168,7 @@ function love.draw()
     for i, p in ipairs(powerUps) do
         love.graphics.draw(p.sprite, p.x, p.y)
     end
+	love.graphics.draw(bloodParticles, 0, 0)
 end
 
 
@@ -252,6 +262,8 @@ function handleBulletWound(bullet, werewolf)
     if werewolf.health <= 0 then
         werewolf.dead = true
         score = score + werewolf.score
+		bloodParticles:setPosition(werewolf.x, werewolf.y)
+        bloodParticles:emit(32)
     end
 
     for i = #werewolves, 1, -1 do
