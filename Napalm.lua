@@ -1,16 +1,15 @@
 local Napalm = {}
 Napalm.__index = Napalm
-
+local napalmTimer = 0
 -- Constructor de la clase
 function Napalm:new(sprite)
     -- Creamos una nueva tabla que representará la instancia
     local instance = setmetatable({}, Napalm)
-    
+
     -- Inicializamos las propiedades de la instancia
     instance.x = math.random(0, love.graphics.getWidth())
     instance.y = math.random(0, love.graphics.getHeight())
-    instance.timer = 5 
-    instance.spawned = true 
+    instance.spawned = true
     instance.type = "Napalm"
     instance.sprite = sprite
     -- Retornamos la instancia
@@ -28,4 +27,4 @@ function Napalm:restarTiempo(dt)
     return self.timer
 end
 
-return Napalm
+return Napalm, napalmTimer

@@ -1,20 +1,20 @@
 local Rifle = {}
 Rifle.__index = Rifle
-
+local rifleTimer = 0
 -- Constructor de la clase
 function Rifle:new(sprite)
     -- Creamos una nueva tabla que representará la instancia
     local instance = setmetatable({}, Rifle)
-    
+
     -- Inicializamos las propiedades de la instancia
     instance.x = math.random(0, love.graphics.getWidth())
     instance.y = math.random(0, love.graphics.getHeight())
     instance.damage = 10
     instance.dead = false
-    instance.spawned = true 
+    instance.spawned = true
     instance.type = "Rifle"
     instance.sprite = sprite
-    instance.timer = 5
+
 
     -- Retornamos la instancia
     return instance
@@ -33,7 +33,7 @@ function Rifle:restarTiempo(dt)
 end
 
 
-return Rifle
+return Rifle, rifleTimer
 
 
 

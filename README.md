@@ -21,7 +21,7 @@ To Do:
 - Agregar niveles
 
 Federico: 
-    - Agregar vida al personaje
+    -menu
     - Comportamiento cuando se muere un zombie.
 Martin: 
     - Agregar Rifle Napalm Shotgun.
