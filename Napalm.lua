@@ -1,6 +1,6 @@
 local Napalm = {}
 Napalm.__index = Napalm
-local napalmTimer = 0
+--local napalmTimer = 0
 -- Constructor de la clase
 function Napalm:new(sprite)
     -- Creamos una nueva tabla que representará la instancia
@@ -12,7 +12,9 @@ function Napalm:new(sprite)
     instance.spawned = true
     instance.type = "Napalm"
     instance.sprite = sprite
-    -- Retornamos la instancia
+    instance.dead = false
+    -- Retornamos la instancia    
+    
     return instance
 end
 
