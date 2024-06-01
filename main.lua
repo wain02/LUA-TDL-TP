@@ -3,9 +3,14 @@ local Rifle, rifleTimer =  require("Rifle")
 local Shotgun =  require("Shotgun")
 local Napalm, napalmTimer  =  require("Napalm")
 local napalmColision = 0
+
 function love.load()
     math.randomseed(os.time())
+    islandImage = love.graphics.newImage('isla.png')
+    islandImageScale = 0.5
     gameState = "menu"
+    currentLevel = 1
+
     --Audio
     hitSounds = {}
     hitSounds.hit = love.audio.newSource("sounds/hit1.mp3", "static")
@@ -18,7 +23,7 @@ function love.load()
     -- Colores originales
     r, g, b, a = love.graphics.getColor()
 
-	backgroundMenu = love.graphics.newImage("isla.png")
+    backgroundMenu = love.graphics.newImage("isla.png")
 
     -- Cargar sprites
     sprites = {}
@@ -30,7 +35,6 @@ function love.load()
     sprites.powerUps = love.graphics.newImage('sprites/powerup.png')
     sprites.rifle = love.graphics.newImage('sprites/rifle.png')
     sprites.napalm = love.graphics.newImage('sprites/napalm.png')
-
 
     -- Inicializar jugador
     player = {}
@@ -49,12 +53,12 @@ function love.load()
     bullets = {}
     powerUps = {}
 
-    -- Crear el sistema de partï¿½culas de sangre
+    -- Crear el sistema de partículas de sangre
     bloodParticles = love.graphics.newParticleSystem(sprites.blood, 100)
-    bloodParticles:setParticleLifetime(0.5, 1) -- Las partï¿½culas vivirï¿½n entre 0.5 y 1 segundos.
-    bloodParticles:setLinearAcceleration(-200, -200, 200, 200) -- Aceleraciï¿½n de las partï¿½culas.
-    bloodParticles:setSizes(0.5, 1) -- Tamaï¿½os de las partï¿½culas.
-    bloodParticles:setColors(1, 0, 0, 1, 1, 0, 0, 0) -- De rojo sï¿½lido a transparente.
+    bloodParticles:setParticleLifetime(0.5, 1) -- Las partículas vivirán entre 0.5 y 1 segundos.
+    bloodParticles:setLinearAcceleration(-200, -200, 200, 200) -- Aceleración de las partículas.
+    bloodParticles:setSizes(0.5, 1) -- Tamaños de las partículas.
+    bloodParticles:setColors(1, 0, 0, 1, 1, 0, 0, 0) -- De rojo sólido a transparente.
 
     -- Inicializar offsets para centrado de sprites
     offsets = {}
@@ -67,16 +71,14 @@ function love.load()
 
     -- Inicializar variables de juego
     gameFont = love.graphics.newFont(40)
-	-- Inicializar variable de puntuaciï¿½n
     score = 0
-    -- Inicializar variables de tiempo
     gameTimer = 300
     maxWerewolfTime = 2
     werewolfTimer = 2
     playerDamageTimer = 0
-	rifleTimer =  5
+    rifleTimer = 5
     napalmTimer = 5
-    explotionTimer = 1 
+    explotionTimer = 1
 end
 
 function love.update(dt)
@@ -94,7 +96,7 @@ function love.update(dt)
 
         if gameTimer <= 0 then
             gameTimer = 0
-            gameState = "menu" -- Cambiar al estado del menï¿½ cuando el tiempo llegue a cero
+            gameState = "menu"
         end
 
         werewolfTimer = werewolfTimer - dt
@@ -104,7 +106,7 @@ function love.update(dt)
             werewolfTimer = math.random(0.8, maxWerewolfTime)
             maxWerewolfTime = maxWerewolfTime * 0.9
         end
-        
+
         if playerDamageTimer <= 0 and not player.canTakeDmg then
             player.canTakeDmg = true
             playerDamageTimer = 0.2
@@ -115,23 +117,27 @@ function love.update(dt)
             playerDamageTimer = playerDamageTimer - dt
         end
 
-        if rifleTimer <= 0 then
-             spawnRifle(dt)
-             rifleTimer = 10
-         end
-        if rifleTimer > 0 then
-            rifleTimer = rifleTimer - dt
+        if currentLevel < 3 then
+            if rifleTimer <= 0 then
+                spawnRifle(dt)
+                rifleTimer = 10
+            end
+            if rifleTimer > 0 then
+                rifleTimer = rifleTimer - dt
+            end
         end
 
-        if napalmTimer <= 0 then
-            spawnNapalm(dt)
-            napalmTimer = 5
-        end
-        if napalmTimer > 0 then
-            napalmTimer = napalmTimer - dt
-        end
-        if explotionTimer > 0 then
-            explotionTimer = explotionTimer - dt
+        if currentLevel == 1 then
+            if napalmTimer <= 0 then
+                spawnNapalm(dt)
+                napalmTimer = 5
+            end
+            if napalmTimer > 0 then
+                napalmTimer = napalmTimer - dt
+            end
+            if explotionTimer > 0 then
+                explotionTimer = explotionTimer - dt
+            end
         end
     end
 end
@@ -145,25 +151,21 @@ function love.draw()
 
         love.graphics.setFont(gameFont)
         love.graphics.print("HP: " .. player.hp)
-        love.graphics.print("Score: ".. score, 225)
+        love.graphics.print("Score: " .. score, 225)
         love.graphics.print("Time: " .. math.ceil(gameTimer), 450)
-
-        if gameState == 1 then
-            love.graphics.printf("Click anywhere to begin!", 0, love.graphics.getHeight() / 2, love.graphics.getWidth(), "center")
-        end
 
         if player.canTakeDmg == false then
             love.graphics.setColor(1, 0, 0)
         else
             love.graphics.setColor(r, g, b, a)
         end
-        
+
         if napalmColision == 1 then
-            love.graphics.setColor(1,1,0)
+            love.graphics.setColor(1, 1, 0)
             if explotionTimer == 0 then
                 love.graphics.setColor(r, g, b, a)
-            end            
-        else 
+            end
+        else
             love.graphics.setColor(r, g, b, a)
         end
 
@@ -181,40 +183,67 @@ function love.draw()
             love.graphics.draw(p.sprite, p.x, p.y)
         end
 
-        love.graphics.draw(bloodParticles, 0, 0) -- Dibujar las partï¿½culas de sangre
+        love.graphics.draw(bloodParticles, 0, 0) -- Dibujar las partículas de sangre
     end
 end
 
 function drawMenu()
-	local scaleX = 0.5
-    local scaleY = 0.3
-     love.graphics.draw(backgroundMenu, 0, 0, scaleX, scaleY)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(islandImage, love.graphics.getWidth() / 2 - (islandImage:getWidth() * islandImageScale) / 2, love.graphics.getHeight() / 4, 0, islandImageScale, islandImageScale)
     love.graphics.setFont(gameFont)
     love.graphics.printf("La Isla de los Lobos", 0, love.graphics.getHeight() / 4, love.graphics.getWidth(), "center")
-    love.graphics.printf("Press Enter to Start", 0, love.graphics.getHeight() / 2, love.graphics.getWidth(), "center")
+    love.graphics.printf("Selecciona un nivel", 0, love.graphics.getHeight() / 2, love.graphics.getWidth(), "center")
+
+    local levelPositions = {
+        {x = love.graphics.getWidth() / 2 - 150, y = love.graphics.getHeight() / 2 + 50},
+        {x = love.graphics.getWidth() / 2, y = love.graphics.getHeight() / 2 + 100},
+        {x = love.graphics.getWidth() / 2 + 150, y = love.graphics.getHeight() / 2 + 200}
+    }
+
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.printf("Nvl 1", levelPositions[1].x - 50, levelPositions[1].y - 20, 100, "center")
+    love.graphics.printf("Nvl 2", levelPositions[2].x - 50, levelPositions[2].y - 20, 100, "center")
+    love.graphics.printf("Nvl 3", levelPositions[3].x - 50, levelPositions[3].y - 20, 100, "center")
 end
+
 function love.keypressed(key)
     if gameState == "menu" and key == "return" then
         gameState = "playing"
         player.hp = 10
-        gameTimer = 300 -- Reiniciar el contador de tiempo al iniciar el juego
-    elseif gameState == "playing" and key == "space" then
-        spawnWerewolf()
+        gameTimer = 300
+    elseif gameState == "playing" then
+        if key == "space" then
+            spawnWerewolf()
+        elseif key == "f" then
+            spawnBullet()
+        end
     end
 end
 
 function love.mousepressed(x, y, button)
-    if button == 1 and gameState == "playing" then
-        spawnBullet()
-    elseif button == 1 and gameState == 1 then
-        gameState = 2
-        player.hp = 10
+    if button == 1 then
+        if gameState == "menu" then
+
+            local levelPositions = {
+                {x = love.graphics.getWidth() / 2 - 150, y = love.graphics.getHeight() / 2 + 50},
+                {x = love.graphics.getWidth() / 2, y = love.graphics.getHeight() / 2 + 100},
+                {x = love.graphics.getWidth() / 2 + 150, y = love.graphics.getHeight() / 2 + 200}
+            }
+
+            if x > levelPositions[1].x - 50 and x < levelPositions[1].x + 50 and y > levelPositions[1].y - 50 and y < levelPositions[1].y + 50 then
+                currentLevel = 1
+            elseif x > levelPositions[2].x - 50 and x < levelPositions[2].x + 50 and y > levelPositions[2].y - 50 and y < levelPositions[2].y + 50 then
+                currentLevel = 2
+            elseif x > levelPositions[3].x - 50 and x < levelPositions[3].x + 50 and y > levelPositions[3].y - 50 and y < levelPositions[3].y + 50 then
+                currentLevel = 3
+            end
+            gameState = "playing"
+            player.hp = 10
+        elseif gameState == "playing" then
+            spawnBullet()
+        end
     end
 end
-
-
-
-
 
 function handlePlayerMovement(dt)
     if (love.keyboard.isDown("d") or love.keyboard.isDown("right")) and player.x < love.graphics.getWidth() then
@@ -257,12 +286,12 @@ function handleCollisions()
                 player.hp = player.hp - 1
                 playerDamageTimer = 0.4
                 player.canTakeDmg = false
-                player.speed = (player.speed)*1.5
+                player.speed = (player.speed) * 1.5
                 playHitSound(hitSounds)
             end
 
             if player.hp == 0 then
-                gameState = 1
+                gameState = "menu"
                 for i, w in ipairs(werewolves) do
                     werewolves[i] = nil
                 end
@@ -280,7 +309,6 @@ function handleCollisions()
         if distanceBetween(player.x, player.y, p.x, p.y) < 50 then
             handlePowerUp(player, p)
             table.remove(powerUps, i)
-            
         end
     end
 end
@@ -292,7 +320,7 @@ function handleBulletWound(bullet, werewolf)
     if werewolf.health <= 0 then
         werewolf.dead = true
         score = score + werewolf.score
-		bloodParticles:setPosition(werewolf.x, werewolf.y)
+        bloodParticles:setPosition(werewolf.x, werewolf.y)
         bloodParticles:emit(32)
     end
 
@@ -312,7 +340,6 @@ function handleBulletWound(bullet, werewolf)
 end
 
 function handlePowerUp(player, p)
-    -- p.sound:play()
     if p.type == "Napalm" then
         player.sprite = sprites.player
         for i = #werewolves, 1, -1 do
@@ -322,11 +349,8 @@ function handlePowerUp(player, p)
         p.dead = true
         powerUpSounds.wow:play()
         napalmColision = 1
-        love.draw()
-        
-        
-
     end
+
     if p.type == "Rifle" then
         player.sprite = sprites.player
         player.damage = 20
@@ -349,9 +373,9 @@ end
 
 function spawnRifle()
     local rifle = Rifle:new(sprites.rifle)
-
     table.insert(powerUps, rifle)
 end
+
 function spawnShotgun()
     local shotgun = Shotgun:new()
     table.insert(powerUps, shotgun)
@@ -359,7 +383,6 @@ end
 
 function spawnNapalm()
     local napalm = Napalm:new(sprites.napalm)
-    --werewolfs = {}              --si el personaje agarra la napalm mueren los werefolfs
     table.insert(powerUps, napalm)
 end
 
@@ -371,7 +394,6 @@ function spawnBullet()
     bullet.direction = playerMouseAngle()
     bullet.damage = player.damage
     bullet.dead = false
-
     table.insert(bullets, bullet)
 end
 
@@ -389,7 +411,7 @@ function distanceBetween(x1, y1, x2, y2)
 end
 
 function playHitSound(hitSounds)
-    if math.random(0,1)<0.5 then
+    if math.random(0, 1) < 0.5 then
         hitSounds.hit:play()
     else
         hitSounds.hitTwo:play()
