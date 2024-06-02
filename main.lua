@@ -1,8 +1,9 @@
 local Werewolf = require("Werewolf")
 local Rifle, rifleTimer =  require("Rifle")
-local Shotgun =  require("Shotgun")
+local Shotgun, shotgunTimer =  require("Shotgun")
 local Napalm, napalmTimer  =  require("Napalm")
 local napalmColision = 0
+local bulletShotgun = false
 
 function love.load()
     math.randomseed(os.time())
@@ -35,6 +36,7 @@ function love.load()
     sprites.powerUps = love.graphics.newImage('sprites/powerup.png')
     sprites.rifle = love.graphics.newImage('sprites/rifle.png')
     sprites.napalm = love.graphics.newImage('sprites/napalm.png')
+    sprites.shotgun = love.graphics.newImage('sprites/shotgun.png')
 
     -- Inicializar jugador
     player = {}
@@ -53,12 +55,12 @@ function love.load()
     bullets = {}
     powerUps = {}
 
-    -- Crear el sistema de partículas de sangre
+    -- Crear el sistema de partï¿½culas de sangre
     bloodParticles = love.graphics.newParticleSystem(sprites.blood, 100)
-    bloodParticles:setParticleLifetime(0.5, 1) -- Las partículas vivirán entre 0.5 y 1 segundos.
-    bloodParticles:setLinearAcceleration(-200, -200, 200, 200) -- Aceleración de las partículas.
-    bloodParticles:setSizes(0.5, 1) -- Tamaños de las partículas.
-    bloodParticles:setColors(1, 0, 0, 1, 1, 0, 0, 0) -- De rojo sólido a transparente.
+    bloodParticles:setParticleLifetime(0.5, 1) -- Las partï¿½culas vivirï¿½n entre 0.5 y 1 segundos.
+    bloodParticles:setLinearAcceleration(-200, -200, 200, 200) -- Aceleraciï¿½n de las partï¿½culas.
+    bloodParticles:setSizes(0.5, 1) -- Tamaï¿½os de las partï¿½culas.
+    bloodParticles:setColors(1, 0, 0, 1, 1, 0, 0, 0) -- De rojo sï¿½lido a transparente.
 
     -- Inicializar offsets para centrado de sprites
     offsets = {}
@@ -79,6 +81,7 @@ function love.load()
     rifleTimer = 5
     napalmTimer = 5
     explotionTimer = 1
+    shotgunTimer = 5
 end
 
 function love.update(dt)
@@ -127,9 +130,19 @@ function love.update(dt)
             end
         end
 
+        if currentLevel < 3 then
+            if shotgunTimer <= 0 then
+                spawnShotgun(dt)
+                shotgunTimer = 5
+            end
+            if shotgunTimer > 0 then
+                shotgunTimer = shotgunTimer - dt
+            end
+        end
+
         if currentLevel == 1 then
             if napalmTimer <= 0 then
-                spawnNapalm(dt)
+                spawnNapalm()
                 napalmTimer = 5
             end
             if napalmTimer > 0 then
@@ -183,7 +196,7 @@ function love.draw()
             love.graphics.draw(p.sprite, p.x, p.y)
         end
 
-        love.graphics.draw(bloodParticles, 0, 0) -- Dibujar las partículas de sangre
+        love.graphics.draw(bloodParticles, 0, 0) -- Dibujar las partï¿½culas de sangre
     end
 end
 
@@ -314,7 +327,12 @@ function handleCollisions()
 end
 
 function handleBulletWound(bullet, werewolf)
-    bullet.dead = true
+    
+    if bulletShotgun == true then
+        bullet.dead = false --aca la bala desaparece
+    else
+        bullet.dead = true --aca bala desaparece 
+    end
     werewolf.health = werewolf.health - bullet.damage
 
     if werewolf.health <= 0 then
@@ -356,6 +374,13 @@ function handlePowerUp(player, p)
         player.damage = 20
         p.dead = true
     end
+
+    if p.type == "Shotgun" then
+        player.sprite = sprites.player
+        player.damage = 10
+        p.dead = true
+        bulletShotgun = true
+    end
 end
 
 function playerMouseAngle()
@@ -377,7 +402,7 @@ function spawnRifle()
 end
 
 function spawnShotgun()
-    local shotgun = Shotgun:new()
+    local shotgun = Shotgun:new(sprites.shotgun)
     table.insert(powerUps, shotgun)
 end
 
@@ -394,6 +419,7 @@ function spawnBullet()
     bullet.direction = playerMouseAngle()
     bullet.damage = player.damage
     bullet.dead = false
+    bullet.shotgun = false
     table.insert(bullets, bullet)
 end
 

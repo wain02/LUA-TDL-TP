@@ -1,8 +1,9 @@
 local Shotgun = {}
 Shotgun.__index = Shotgun
+local shotgunTimer = 0
 
 -- Constructor de la clase
-function Shotgun:new()
+function Shotgun:new(sprite)
     -- Creamos una nueva tabla que representará la instancia
     local instance = setmetatable({}, Shotgun)
     
@@ -12,6 +13,10 @@ function Shotgun:new()
     instance.timer = 10
     instance.damage = 5
     instance.dead = false
+    instance.spawned = true
+    instance.type = "Shotgun"
+    instance.sprite = sprite
+
     
 
 
@@ -26,7 +31,10 @@ function Shotgun:myMethod()
 end
 
 --function SilverBullet()
-    
+function Shotgun:restarTiempo(dt)
+    self.timer = self.timer - dt
+    return self.timer
+end   
 
 
-return ShotGun
+return Shotgun, shotgunTimer
