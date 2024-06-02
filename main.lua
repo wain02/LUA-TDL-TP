@@ -1,9 +1,10 @@
 local Werewolf = require("Werewolf")
 local Rifle, rifleTimer =  require("Rifle")
-local Shotgun =  require("Shotgun")
+local Shotgun, shotgunTimer =  require("Shotgun")
 local Napalm, napalmTimer  =  require("Napalm")
 local Player = require("Player")
 local napalmColision = 0
+local bulletShotgun = false
 
 function love.load()
     math.randomseed(os.time())
@@ -36,6 +37,8 @@ function love.load()
     sprites.powerUps = love.graphics.newImage('sprites/powerup.png')
     sprites.rifle = love.graphics.newImage('sprites/rifle.png')
     sprites.napalm = love.graphics.newImage('sprites/napalm.png')
+    sprites.shotgun = love.graphics.newImage('sprites/shotgun.png')
+    sprites.playershotgun = love.graphics.newImage('sprites/playershotgun.png')
 
     -- Inicializar jugador
     player = Player:new(sprites.player)
@@ -70,6 +73,7 @@ function love.load()
     rifleTimer = 5
     napalmTimer = 5
     explotionTimer = 1
+    shotgunTimer = 5
 end
 
 function love.update(dt)
@@ -110,9 +114,19 @@ function love.update(dt)
             end
         end
 
+        if currentLevel < 3 then
+            if shotgunTimer <= 0 then
+                spawnShotgun(dt)
+                shotgunTimer = 5
+            end
+            if shotgunTimer > 0 then
+                shotgunTimer = shotgunTimer - dt
+            end
+        end
+
         if currentLevel == 1 then
             if napalmTimer <= 0 then
-                spawnNapalm(dt)
+                spawnNapalm()
                 napalmTimer = 5
             end
             if napalmTimer > 0 then
@@ -290,7 +304,12 @@ function handleCollisions()
 end
 
 function handleBulletWound(bullet, werewolf)
-    bullet.dead = true
+    
+    if bulletShotgun == true then
+        bullet.dead = false --aca la bala desaparece
+    else
+        bullet.dead = true --aca bala desaparece 
+    end
     werewolf.health = werewolf.health - bullet.damage
 
     if werewolf.health <= 0 then
@@ -335,6 +354,13 @@ function handlePowerUp(player, p)
         player.damage = 20
         p.dead = true
     end
+
+    if p.type == "Shotgun" then
+        player.sprite = sprites.playershotgun
+        player.damage = 10
+        p.dead = true
+        bulletShotgun = true
+    end
 end
 
 function playerMouseAngle()
@@ -356,7 +382,7 @@ function spawnRifle()
 end
 
 function spawnShotgun()
-    local shotgun = Shotgun:new()
+    local shotgun = Shotgun:new(sprites.shotgun)
     table.insert(powerUps, shotgun)
 end
 
@@ -373,6 +399,7 @@ function spawnBullet()
     bullet.direction = playerMouseAngle()
     bullet.damage = player.damage
     bullet.dead = false
+    bullet.shotgun = false
     table.insert(bullets, bullet)
 end
 
