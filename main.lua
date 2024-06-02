@@ -132,6 +132,7 @@ function love.update(dt)
             if napalmTimer > 0 then
                 napalmTimer = napalmTimer - dt
             end
+            -- napalmColision depende de explotionTimer, ARREGLAR
             if explotionTimer > 0 then
                 explotionTimer = explotionTimer - dt
             end
@@ -151,20 +152,16 @@ function love.draw()
         love.graphics.print("Score: " .. score, 225)
         love.graphics.print("Time: " .. math.ceil(gameTimer), 450)
 
-        if not (player:can_take_damage()) then
+        if not(player:can_take_damage()) then
             love.graphics.setColor(1, 0, 0)
         else
-            love.graphics.setColor(r,g,b,a)
-        end
-
-        if napalmColision == 1 then
-            love.graphics.setColor(1, 1, 0)
-            if explotionTimer == 0 then
+            if napalmColision == 1 then
+                love.graphics.setColor(1, 1, 0)
+            else
                 love.graphics.setColor(r, g, b, a)
             end
-        else
-            love.graphics.setColor(r, g, b, a)
         end
+
 
         love.graphics.draw(player.sprite, player.x, player.y, player.orientation, nil, nil, offsets.playerX, offsets.playerY)
 
