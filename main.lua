@@ -2,6 +2,7 @@ local Werewolf = require("Werewolf")
 local Rifle, rifleTimer =  require("Rifle")
 local Shotgun =  require("Shotgun")
 local Napalm, napalmTimer  =  require("Napalm")
+local Player = require("Player")
 local napalmColision = 0
 
 function love.load()
@@ -37,28 +38,19 @@ function love.load()
     sprites.napalm = love.graphics.newImage('sprites/napalm.png')
 
     -- Inicializar jugador
-    player = {}
-    velocidadOriginal = 500
-    player.sprite = sprites.player
-    player.x = love.graphics.getWidth() / 2
-    player.y = love.graphics.getHeight() / 2
-    player.speed = velocidadOriginal
-    player.orientation = 0
-    player.hp = 10
-    player.damage = 10
-    player.canTakeDmg = true
+    player = Player:new(sprites.player)
 
     -- Inicializar listas de objetos
     werewolves = {}
     bullets = {}
     powerUps = {}
 
-    -- Crear el sistema de partículas de sangre
+    -- Crear el sistema de partï¿½culas de sangre
     bloodParticles = love.graphics.newParticleSystem(sprites.blood, 100)
-    bloodParticles:setParticleLifetime(0.5, 1) -- Las partículas vivirán entre 0.5 y 1 segundos.
-    bloodParticles:setLinearAcceleration(-200, -200, 200, 200) -- Aceleración de las partículas.
-    bloodParticles:setSizes(0.5, 1) -- Tamaños de las partículas.
-    bloodParticles:setColors(1, 0, 0, 1, 1, 0, 0, 0) -- De rojo sólido a transparente.
+    bloodParticles:setParticleLifetime(0.5, 1) -- Las partï¿½culas vivirï¿½n entre 0.5 y 1 segundos.
+    bloodParticles:setLinearAcceleration(-200, -200, 200, 200) -- Aceleraciï¿½n de las partï¿½culas.
+    bloodParticles:setSizes(0.5, 1) -- Tamaï¿½os de las partï¿½culas.
+    bloodParticles:setColors(1, 0, 0, 1, 1, 0, 0, 0) -- De rojo sï¿½lido a transparente.
 
     -- Inicializar offsets para centrado de sprites
     offsets = {}
@@ -75,7 +67,6 @@ function love.load()
     gameTimer = 300
     maxWerewolfTime = 2
     werewolfTimer = 2
-    playerDamageTimer = 0
     rifleTimer = 5
     napalmTimer = 5
     explotionTimer = 1
@@ -107,15 +98,7 @@ function love.update(dt)
             maxWerewolfTime = maxWerewolfTime * 0.9
         end
 
-        if playerDamageTimer <= 0 and not player.canTakeDmg then
-            player.canTakeDmg = true
-            playerDamageTimer = 0.2
-            player.speed = velocidadOriginal
-        end
-
-        if playerDamageTimer > 0 then
-            playerDamageTimer = playerDamageTimer - dt
-        end
+        player:refresh_invulnerability(dt)
 
         if currentLevel < 3 then
             if rifleTimer <= 0 then
@@ -150,14 +133,14 @@ function love.draw()
         love.graphics.draw(sprites.background, 0, 0)
 
         love.graphics.setFont(gameFont)
-        love.graphics.print("HP: " .. player.hp)
+        love.graphics.print("HP: " .. player:get_hp())
         love.graphics.print("Score: " .. score, 225)
         love.graphics.print("Time: " .. math.ceil(gameTimer), 450)
 
-        if player.canTakeDmg == false then
+        if not (player:can_take_damage()) then
             love.graphics.setColor(1, 0, 0)
         else
-            love.graphics.setColor(r, g, b, a)
+            love.graphics.setColor(r,g,b,a)
         end
 
         if napalmColision == 1 then
@@ -183,7 +166,7 @@ function love.draw()
             love.graphics.draw(p.sprite, p.x, p.y)
         end
 
-        love.graphics.draw(bloodParticles, 0, 0) -- Dibujar las partículas de sangre
+        love.graphics.draw(bloodParticles, 0, 0) -- Dibujar las partï¿½culas de sangre
     end
 end
 
@@ -209,7 +192,7 @@ end
 function love.keypressed(key)
     if gameState == "menu" and key == "return" then
         gameState = "playing"
-        player.hp = 10
+        player:refill_hp()
         gameTimer = 300
     elseif gameState == "playing" then
         if key == "space" then
@@ -238,7 +221,7 @@ function love.mousepressed(x, y, button)
                 currentLevel = 3
             end
             gameState = "playing"
-            player.hp = 10
+            player:refill_hp()
         elseif gameState == "playing" then
             spawnBullet()
         end
@@ -262,7 +245,7 @@ function handlePlayerMovement(dt)
         player.y = player.y + player.speed * dt
     end
 
-    player.orientation = playerMouseAngle()
+    player:set_orientation(playerMouseAngle())
 end
 
 function handleWerewolvesMovement(dt)
@@ -282,15 +265,8 @@ end
 function handleCollisions()
     for i, w in ipairs(werewolves) do
         if distanceBetween(w.x, w.y, player.x, player.y) < 10 then
-            if player.canTakeDmg == true then
-                player.hp = player.hp - 1
-                playerDamageTimer = 0.4
-                player.canTakeDmg = false
-                player.speed = (player.speed) * 1.5
-                playHitSound(hitSounds)
-            end
-
-            if player.hp == 0 then
+            player:take_damage(w)
+            if player:get_hp() <= 0 then
                 gameState = "menu"
                 for i, w in ipairs(werewolves) do
                     werewolves[i] = nil
@@ -340,6 +316,9 @@ function handleBulletWound(bullet, werewolf)
 end
 
 function handlePowerUp(player, p)
+    -- p.sound:play()
+    -- player.sprite = p.get_player_sprite()
+    -- player.damage = p.get_damage()
     if p.type == "Napalm" then
         player.sprite = sprites.player
         for i = #werewolves, 1, -1 do
@@ -367,7 +346,7 @@ function werewolfPlayerAngle(werewolf)
 end
 
 function spawnWerewolf()
-    local werewolf = Werewolf:new()
+    werewolf = Werewolf:new()
     table.insert(werewolves, werewolf)
 end
 
