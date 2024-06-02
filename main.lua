@@ -37,6 +37,7 @@ function love.load()
     sprites.rifle = love.graphics.newImage('sprites/rifle.png')
     sprites.napalm = love.graphics.newImage('sprites/napalm.png')
     sprites.shotgun = love.graphics.newImage('sprites/shotgun.png')
+    sprites.playershotgun = love.graphics.newImage('sprites/playershotgun.png')
 
     -- Inicializar jugador
     player = {}
@@ -376,7 +377,7 @@ function handlePowerUp(player, p)
     end
 
     if p.type == "Shotgun" then
-        player.sprite = sprites.player
+        player.sprite = sprites.playershotgun
         player.damage = 10
         p.dead = true
         bulletShotgun = true
