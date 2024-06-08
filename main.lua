@@ -29,11 +29,14 @@ function love.load()
 
     -- Cargar sprites
     sprites = {}
+    wolfSprites = {}
     sprites.blood = love.graphics.newImage('sprites/blood.png')
     sprites.background = love.graphics.newImage('sprites/background.png')
     sprites.bullet = love.graphics.newImage('sprites/bullet.png')
     sprites.player = love.graphics.newImage('sprites/player.png')
-    sprites.werewolf = love.graphics.newImage('sprites/werewolf.png')
+    wolfSprites.defaultWolf = love.graphics.newImage('sprites/defaultWolf.png')
+    wolfSprites.fastWolf = love.graphics.newImage('sprites/fastWolf.png')
+    wolfSprites.beefyWolf = love.graphics.newImage('sprites/beefyWolf.png')
     sprites.powerUps = love.graphics.newImage('sprites/powerup.png')
     sprites.rifle = love.graphics.newImage('sprites/rifle.png')
     sprites.napalm = love.graphics.newImage('sprites/napalm.png')
@@ -59,8 +62,8 @@ function love.load()
     offsets = {}
     offsets.playerX = sprites.player:getWidth() / 2
     offsets.playerY = sprites.player:getHeight() / 2
-    offsets.werewolfX = sprites.werewolf:getWidth() / 2
-    offsets.werewolfY = sprites.werewolf:getHeight() / 2
+    offsets.werewolfX = wolfSprites.defaultWolf:getWidth() / 2
+    offsets.werewolfY = wolfSprites.defaultWolf:getHeight() / 2
     offsets.bulletX = sprites.bullet:getWidth() / 2
     offsets.bulletY = sprites.bullet:getHeight() / 2
 
@@ -81,7 +84,7 @@ function love.update(dt)
         handlePlayerMovement(dt)
         handleWerewolvesMovement(dt)
         handleBulletsMovement(dt)
-        handleCollisions()
+        handle_collisions()
         despawnBullets()
         bloodParticles:update(dt)
 
@@ -166,7 +169,7 @@ function love.draw()
         love.graphics.draw(player.sprite, player.x, player.y, player.orientation, nil, nil, offsets.playerX, offsets.playerY)
 
         for i, w in ipairs(werewolves) do
-            love.graphics.draw(sprites.werewolf, w.x, w.y, werewolfPlayerAngle(w), w.scaleFactor, w.scaleFactor, offsets.werewolfX, offsets.werewolfY)
+            love.graphics.draw(w.sprite, w.x, w.y, werewolfPlayerAngle(w), w.scaleFactor, w.scaleFactor, offsets.werewolfX, offsets.werewolfY)
         end
 
         for i, b in ipairs(bullets) do
@@ -281,7 +284,7 @@ end
 
 function handle_werewolves_collisions()
     for index, aWerewolve in ipairs(werewolves) do
-        if distance_between(aWerewolve, player) < 15 then
+        if distance_between(aWerewolve, player) < 10 then
             player:take_damage(aWerewolve)
             if player:is_dead() then
                 gameState = "menu"
@@ -290,7 +293,7 @@ function handle_werewolves_collisions()
         end
 
         for j, bullet in ipairs(bullets) do
-            if distance_between(aWerewolve, bullet) < 10 then
+            if distance_between(aWerewolve, bullet) < 15 then
                 handleBulletWound(bullet, aWerewolve)
             end
         end
@@ -306,7 +309,7 @@ function handle_powerUps_collisions()
     end
 end
 
-function handleCollisions()
+function handle_collisions()
     handle_werewolves_collisions()
     handle_powerUps_collisions()
 end
@@ -373,7 +376,7 @@ function werewolfPlayerAngle(werewolf)
 end
 
 function spawnWerewolf()
-    werewolf = Werewolf:new()
+    werewolf = Werewolf:new(wolfSprites)
     table.insert(werewolves, werewolf)
 end
 

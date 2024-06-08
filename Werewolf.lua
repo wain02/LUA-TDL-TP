@@ -5,7 +5,7 @@ local FAST_WOLF_PROBABILITY = 0.3
 Werewolf.__index = Werewolf
 
 -- Constructor de la clase
-function Werewolf:new()
+function Werewolf:new(sprites)
     -- Creamos una nueva tabla que representara la instancia
     local instance = setmetatable({}, Werewolf)
     
@@ -18,18 +18,23 @@ function Werewolf:new()
     instance.score = 20
     instance.dead = false
     instance.damage = 1
+    instance.sprite = sprites.defaultWolf
+    
 
     if is_fast_wolf() then
         instance.speed = 200
-        instance.score = 4
+        instance.score = 40
+        instance.damage = 3
+        instance.sprite = sprites.fastWolf
     end
 
     if is_beefy_wolf() then
         instance.health = 50
-        instance.scaleFactor = 0.3
+        instance.scaleFactor = 0.1
         instance.speed = 100
         instance.score = 60
-        instance.damage = 6
+        instance.damage = 4
+        instance.sprite = sprites.beefyWolf
     end
     
     -- Retornamos la instancia
