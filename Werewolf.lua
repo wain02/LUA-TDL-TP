@@ -48,4 +48,14 @@ function Werewolf:get_damage()
     return self.damage
 end
 
+function Werewolf:take_damage(aDamage, score, bloodParticles)
+    self.health = self.health - aDamage
+    if (self.health <= 0) then
+        self.dead = true
+        score.total = score.total + self.score
+        bloodParticles:setPosition(self.x, self.y)
+        bloodParticles:emit(32)
+    end
+end
+
 return Werewolf

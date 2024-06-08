@@ -66,7 +66,7 @@ function love.load()
 
     -- Inicializar variables de juego
     gameFont = love.graphics.newFont(40)
-    score = 0
+    score = {total = 0}
     gameTimer = 300
     maxWerewolfTime = 2
     werewolfTimer = 2
@@ -149,7 +149,7 @@ function love.draw()
 
         love.graphics.setFont(gameFont)
         love.graphics.print("HP: " .. player:get_hp())
-        love.graphics.print("Score: " .. score, 225)
+        love.graphics.print("Score: " .. score.total, 225)
         love.graphics.print("Time: " .. math.ceil(gameTimer), 450)
 
         if not(player:can_take_damage()) then
@@ -307,14 +307,7 @@ function handleBulletWound(bullet, werewolf)
     else
         bullet.dead = true --aca bala desaparece 
     end
-    werewolf.health = werewolf.health - bullet.damage
-
-    if werewolf.health <= 0 then
-        werewolf.dead = true
-        score = score + werewolf.score
-        bloodParticles:setPosition(werewolf.x, werewolf.y)
-        bloodParticles:emit(32)
-    end
+    werewolf:take_damage(bullet.damage, score, bloodParticles)
 
     for i = #werewolves, 1, -1 do
         local w = werewolves[i]
