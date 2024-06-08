@@ -273,31 +273,42 @@ function handleBulletsMovement(dt)
     end
 end
 
-function handleCollisions()
-    for i, w in ipairs(werewolves) do
-        if distanceBetween(w.x, w.y, player.x, player.y) < 10 then
-            player:take_damage(w)
-            if player:get_hp() <= 0 then
+function kill_werewolves()
+    for index, aWerewolve in ipairs(werewolves) do
+        werewolves[index] = nil
+    end
+end
+
+function handle_werewolves_collisions()
+    for index, aWerewolve in ipairs(werewolves) do
+        if distance_between(aWerewolve, player) < 15 then
+            player:take_damage(aWerewolve)
+            if player:is_dead() then
                 gameState = "menu"
-                for i, w in ipairs(werewolves) do
-                    werewolves[i] = nil
-                end
+                kill_werewolves()
             end
         end
 
-        for j, b in ipairs(bullets) do
-            if distanceBetween(w.x, w.y, b.x, b.y) < 10 then
-                handleBulletWound(b, w)
+        for j, bullet in ipairs(bullets) do
+            if distance_between(aWerewolve, bullet) < 10 then
+                handleBulletWound(bullet, aWerewolve)
             end
         end
     end
+end
 
-    for i, p in ipairs(powerUps) do
-        if distanceBetween(player.x, player.y, p.x, p.y) < 50 then
-            handlePowerUp(player, p)
-            table.remove(powerUps, i)
+function handle_powerUps_collisions()
+    for index, powerUp in ipairs(powerUps) do
+        if distance_between(player, powerUp) < 50 then
+            handlePowerUp(player, powerUp)
+            table.remove(powerUps, index)
         end
     end
+end
+
+function handleCollisions()
+    handle_werewolves_collisions()
+    handle_powerUps_collisions()
 end
 
 function handleBulletWound(bullet, werewolf)
@@ -402,7 +413,11 @@ function despawnBullets()
     end
 end
 
-function distanceBetween(x1, y1, x2, y2)
+function distance_between(firstObject, secondObject)
+    local x1 = firstObject.x
+    local x2 = secondObject.x
+    local y1 = firstObject.y
+    local y2 = secondObject.y
     return math.sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2)
 end
 

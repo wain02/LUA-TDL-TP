@@ -55,6 +55,10 @@ function Player:get_hp()
     return self.hp
 end
 
+function Player:is_dead()
+    return ( (self.get_hp(self)) <= 0)
+end
+
 function Player:refill_hp()
     self.hp = INITIAL_HP
 end
