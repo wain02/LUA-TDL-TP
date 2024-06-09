@@ -29,19 +29,23 @@ function love.load()
 
     -- Cargar sprites
     sprites = {}
-    wolfSprites = {}
     sprites.blood = love.graphics.newImage('sprites/blood.png')
     sprites.background = love.graphics.newImage('sprites/background.png')
     sprites.bullet = love.graphics.newImage('sprites/bullet.png')
     sprites.player = love.graphics.newImage('sprites/player.png')
-    wolfSprites.defaultWolf = love.graphics.newImage('sprites/defaultWolf.png')
-    wolfSprites.fastWolf = love.graphics.newImage('sprites/fastWolf.png')
-    wolfSprites.beefyWolf = love.graphics.newImage('sprites/beefyWolf.png')
     sprites.powerUps = love.graphics.newImage('sprites/powerup.png')
     sprites.rifle = love.graphics.newImage('sprites/rifle.png')
     sprites.napalm = love.graphics.newImage('sprites/napalm.png')
     sprites.shotgun = love.graphics.newImage('sprites/shotgun.png')
     sprites.playershotgun = love.graphics.newImage('sprites/playershotgun.png')
+
+    wolfSprites = {}
+    wolfSprites.defaultWolfLeft = love.graphics.newImage('sprites/wolfs/defaultWolfLeft.png')
+    wolfSprites.fastWolfLeft = love.graphics.newImage('sprites/wolfs/fastWolfLeft.png')
+    wolfSprites.beefyWolfLeft = love.graphics.newImage('sprites/wolfs/beefyWolfLeft.png')
+    wolfSprites.defaultWolfRight = love.graphics.newImage('sprites/wolfs/defaultWolfRight.png')
+    wolfSprites.fastWolfRight = love.graphics.newImage('sprites/wolfs/fastWolfRight.png')
+    wolfSprites.beefyWolfRight = love.graphics.newImage('sprites/wolfs/beefyWolfRight.png')
 
     -- Inicializar jugador
     player = Player:new(sprites.player)
@@ -62,8 +66,8 @@ function love.load()
     offsets = {}
     offsets.playerX = sprites.player:getWidth() / 2
     offsets.playerY = sprites.player:getHeight() / 2
-    offsets.werewolfX = wolfSprites.defaultWolf:getWidth() / 2
-    offsets.werewolfY = wolfSprites.defaultWolf:getHeight() / 2
+    offsets.werewolfX = wolfSprites.defaultWolfLeft:getWidth() / 2
+    offsets.werewolfY = wolfSprites.defaultWolfLeft:getHeight() / 2
     offsets.bulletX = sprites.bullet:getWidth() / 2
     offsets.bulletY = sprites.bullet:getHeight() / 2
 
@@ -169,7 +173,7 @@ function love.draw()
         love.graphics.draw(player.sprite, player.x, player.y, player.orientation, nil, nil, offsets.playerX, offsets.playerY)
 
         for i, w in ipairs(werewolves) do
-            love.graphics.draw(w.sprite, w.x, w.y, werewolfPlayerAngle(w), w.scaleFactor, w.scaleFactor, offsets.werewolfX, offsets.werewolfY)
+            love.graphics.draw(w:get_sprite(player), w.x, w.y, werewolfPlayerAngle(w), w:get_scalefactor(player), w:get_scalefactor(player), offsets.werewolfX, offsets.werewolfY)
         end
 
         for i, b in ipairs(bullets) do

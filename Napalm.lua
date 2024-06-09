@@ -13,15 +13,8 @@ function Napalm:new(sprite)
     instance.type = "Napalm"
     instance.sprite = sprite
     instance.dead = false
-    -- Retornamos la instancia    
-    
-    return instance
-end
 
--- método de la clase
-function Napalm:myMethod()
-    print("Property1: " .. self.posicionX)
-    print("Property2: " .. self.posicionY)
+    return instance
 end
 
 function Napalm:restarTiempo(dt)

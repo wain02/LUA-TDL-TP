@@ -1,6 +1,6 @@
 local Werewolf = {}
-local BEEFY_WOLF_PROBABILITY = 0.5
-local FAST_WOLF_PROBABILITY = 0.3
+local BEEFY_WOLF_PROBABILITY = 0.3
+local FAST_WOLF_PROBABILITY = 0.4
 
 Werewolf.__index = Werewolf
 
@@ -14,18 +14,20 @@ function Werewolf:new(sprites)
     instance.y = math.random(0, love.graphics.getHeight())
     instance.speed = 120
     instance.health = 10
-    instance.scaleFactor=0.11
+    instance.scaleFactor=0.6
     instance.score = 20
     instance.dead = false
     instance.damage = 1
-    instance.sprite = sprites.defaultWolf
-    
+    instance.spriteLeft = sprites.defaultWolfLeft
+    instance.spriteRight = sprites.defaultWolfRight    
 
     if is_fast_wolf() then
         instance.speed = 200
         instance.score = 40
         instance.damage = 3
-        instance.sprite = sprites.fastWolf
+        instance.spriteLeft = sprites.fastWolfLeft
+        instance.spriteRight = sprites.fastWolfRight
+        instance.scaleFactor = 0.2
     end
 
     if is_beefy_wolf() then
@@ -34,10 +36,10 @@ function Werewolf:new(sprites)
         instance.speed = 100
         instance.score = 60
         instance.damage = 4
-        instance.sprite = sprites.beefyWolf
+        instance.spriteLeft = sprites.beefyWolfLeft
+        instance.spriteRight = sprites.beefyWolfRight
     end
-    
-    -- Retornamos la instancia
+
     return instance
 end
 
@@ -60,6 +62,22 @@ function Werewolf:take_damage(aDamage, score, bloodParticles)
         score.total = score.total + self.score
         bloodParticles:setPosition(self.x, self.y)
         bloodParticles:emit(32)
+    end
+end
+
+function Werewolf:get_sprite(player)
+    if (self.x > player.x) then
+        return self.spriteRight
+    else
+        return self.spriteLeft
+    end
+end
+
+function Werewolf:get_scalefactor(player)
+    if (self.x > player.x) then
+        return self.scaleFactor*-1
+    else
+        return self.scaleFactor
     end
 end
 
