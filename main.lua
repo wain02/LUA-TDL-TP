@@ -30,7 +30,8 @@ function love.load()
     -- Cargar sprites
     sprites = {}
     sprites.blood = love.graphics.newImage('sprites/blood.png')
-    sprites.background = love.graphics.newImage('sprites/background.png')
+    sprites.backgroundNormal = love.graphics.newImage('sprites/background.png')
+	sprites.backgroundSnow = love.graphics.newImage('sprites/background_snow.png')
     sprites.bullet = love.graphics.newImage('sprites/bullet.png')
     sprites.player = love.graphics.newImage('sprites/player.png')
     sprites.powerUps = love.graphics.newImage('sprites/powerup.png')
@@ -38,6 +39,7 @@ function love.load()
     sprites.napalm = love.graphics.newImage('sprites/napalm.png')
     sprites.shotgun = love.graphics.newImage('sprites/shotgun.png')
     sprites.playershotgun = love.graphics.newImage('sprites/playershotgun.png')
+	sprites.snow = love.graphics.newImage('sprites/snow.png')
 
     wolfSprites = {}
     wolfSprites.defaultWolfLeft = love.graphics.newImage('sprites/wolfs/defaultWolfLeft.png')
@@ -62,6 +64,17 @@ function love.load()
     bloodParticles:setSizes(0.5, 1) -- Tamaï¿½os de las partï¿½culas.
     bloodParticles:setColors(1, 0, 0, 1, 1, 0, 0, 0) -- De rojo sï¿½lido a transparente.
 
+	 -- Crear el sistema de partículas de nieve
+    snowParticles = love.graphics.newParticleSystem(sprites.snow, 1000)
+    snowParticles:setParticleLifetime(2, 5)
+    snowParticles:setEmissionRate(100)
+    snowParticles:setSizeVariation(1)
+    snowParticles:setLinearAcceleration(-20, 30, 20, 60)
+    snowParticles:setSizes(0.1, 0.2)
+    snowParticles:setColors(1, 1, 1, 1, 1, 1, 1, 0)
+    snowParticles:setPosition(love.graphics.getWidth() / 2, -10)
+    snowParticles:setAreaSpread("normal", love.graphics.getWidth(), 0)
+
     -- Inicializar offsets para centrado de sprites
     offsets = {}
     offsets.playerX = sprites.player:getWidth() / 2
@@ -81,6 +94,8 @@ function love.load()
     napalmTimer = 5
     explotionTimer = 1
     shotgunTimer = 5
+    currentBackground = sprites.backgroundNormal
+    backgroundChangeTimer = 10
 end
 
 function love.update(dt)
@@ -91,6 +106,14 @@ function love.update(dt)
         handle_collisions()
         despawnBullets()
         bloodParticles:update(dt)
+
+		if currentLevel == 3 then
+            snowParticles:update(dt)
+            backgroundChangeTimer = backgroundChangeTimer - dt
+            if backgroundChangeTimer <= 0 then
+                currentBackground = sprites.backgroundSnow
+            end
+        end
 
         if gameTimer > 0 then
             gameTimer = gameTimer - dt
@@ -152,7 +175,11 @@ function love.draw()
     if gameState == "menu" then
         drawMenu()
     elseif gameState == "playing" then
-        love.graphics.draw(sprites.background, 0, 0)
+        love.graphics.draw(currentBackground, 0, 0)
+
+        if currentLevel == 3 then
+            love.graphics.draw(snowParticles, 0, 0)
+        end
 
         love.graphics.setFont(gameFont)
         love.graphics.print("HP: " .. player:get_hp())
@@ -169,7 +196,6 @@ function love.draw()
             end
         end
 
-
         love.graphics.draw(player.sprite, player.x, player.y, player.orientation, nil, nil, offsets.playerX, offsets.playerY)
 
         for i, w in ipairs(werewolves) do
@@ -184,9 +210,10 @@ function love.draw()
             love.graphics.draw(p.sprite, p.x, p.y)
         end
 
-        love.graphics.draw(bloodParticles, 0, 0) -- Dibujar las partï¿½culas de sangre
+        love.graphics.draw(bloodParticles, 0, 0)
     end
 end
+
 
 function drawMenu()
     love.graphics.setColor(1, 1, 1)
@@ -212,6 +239,8 @@ function love.keypressed(key)
         gameState = "playing"
         player:refill_hp()
         gameTimer = 300
+		backgroundChangeTimer = 30  -- Reiniciar el temporizador para cambiar el fondo
+        currentBackground = sprites.backgroundNormal -- Asegurarse de que el fondo es el normal al iniciar el juego
     elseif gameState == "playing" then
         if key == "space" then
             spawnWerewolf()
@@ -224,7 +253,6 @@ end
 function love.mousepressed(x, y, button)
     if button == 1 then
         if gameState == "menu" then
-
             local levelPositions = {
                 {x = love.graphics.getWidth() / 2 - 150, y = love.graphics.getHeight() / 2 + 50},
                 {x = love.graphics.getWidth() / 2, y = love.graphics.getHeight() / 2 + 100},
@@ -238,13 +266,17 @@ function love.mousepressed(x, y, button)
             elseif x > levelPositions[3].x - 50 and x < levelPositions[3].x + 50 and y > levelPositions[3].y - 50 and y < levelPositions[3].y + 50 then
                 currentLevel = 3
             end
+
             gameState = "playing"
             player:refill_hp()
+            backgroundChangeTimer = 10 -- Reinicia el temporizador aquí
+            currentBackground = sprites.backgroundNormal -- Reinicia el fondo al inicio del nivel
         elseif gameState == "playing" then
             spawnBullet()
         end
     end
 end
+
 
 function handlePlayerMovement(dt)
     if (love.keyboard.isDown("d") or love.keyboard.isDown("right")) and player.x < love.graphics.getWidth() then
@@ -293,6 +325,7 @@ function handle_werewolves_collisions()
             if player:is_dead() then
                 gameState = "menu"
                 kill_werewolves()
+                currentBackground = sprites.backgroundNormal  -- Restablecer el fondo al normal
             end
         end
 
@@ -303,6 +336,7 @@ function handle_werewolves_collisions()
         end
     end
 end
+
 
 function handle_powerUps_collisions()
     for index, powerUp in ipairs(powerUps) do
@@ -319,11 +353,11 @@ function handle_collisions()
 end
 
 function handleBulletWound(bullet, werewolf)
-    
+
     if bulletShotgun == true then
         bullet.dead = false --aca la bala desaparece
     else
-        bullet.dead = true --aca bala desaparece 
+        bullet.dead = true --aca bala desaparece
     end
     werewolf:take_damage(bullet.damage, score, bloodParticles)
 
