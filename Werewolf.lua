@@ -78,7 +78,14 @@ function Werewolf:get_scalefactor(player)
         return self.scaleFactor*-1
     else
         return self.scaleFactor
-    end
+end
+
+function Werewolf:kill()
+    self.dead = true
+end
+
+function Werewolf:is_death()
+    return self.dead
 end
 
 return Werewolf

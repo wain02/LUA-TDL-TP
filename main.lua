@@ -77,10 +77,10 @@ function love.load()
     gameTimer = 300
     maxWerewolfTime = 2
     werewolfTimer = 2
-    rifleTimer = 5
-    napalmTimer = 5
+    rifleTimer = 30
+    napalmTimer = 30
     explotionTimer = 1
-    shotgunTimer = 5
+    shotgunTimer = 30
 end
 
 function love.update(dt)
@@ -173,7 +173,7 @@ function love.draw()
         love.graphics.draw(player.sprite, player.x, player.y, player.orientation, nil, nil, offsets.playerX, offsets.playerY)
 
         for i, w in ipairs(werewolves) do
-            love.graphics.draw(w:get_sprite(player), w.x, w.y, werewolfPlayerAngle(w), w:get_scalefactor(player), w:get_scalefactor(player), offsets.werewolfX, offsets.werewolfY)
+            love.graphics.draw(w:get_sprite(player), w.x, w.y, werewolfPlayerAngle(w), w.scaleFactor, w.scaleFactor, offsets.werewolfX, offsets.werewolfY)
         end
 
         for i, b in ipairs(bullets) do
@@ -286,10 +286,20 @@ function kill_werewolves()
     end
 end
 
+function kill_werewolve(aWerewolve)
+    aWerewolve:kill()
+    for index, w in ipairs(werewolves) do
+        if w:is_death() then
+            table.remove(werewolves, index)
+        end
+    end
+end
+
 function handle_werewolves_collisions()
     for index, aWerewolve in ipairs(werewolves) do
         if distance_between(aWerewolve, player) < 10 then
             player:take_damage(aWerewolve)
+            kill_werewolve(aWerewolve)
             if player:is_dead() then
                 gameState = "menu"
                 kill_werewolves()
@@ -348,10 +358,7 @@ function handlePowerUp(player, p)
     -- player.damage = p.get_damage()
     if p.type == "Napalm" then
         player.sprite = sprites.player
-        for i = #werewolves, 1, -1 do
-            local w = werewolves[i]
-            table.remove(werewolves, i)
-        end
+        kill_werewolves()
         p.dead = true
         powerUpSounds.wow:play()
         napalmColision = 1
