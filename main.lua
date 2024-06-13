@@ -133,9 +133,9 @@ function love.update(dt)
                 napalmTimer = napalmTimer - dt
             end
             -- napalmColision depende de explotionTimer, ARREGLAR
-            if explotionTimer > 0 then
-                explotionTimer = explotionTimer - dt
-            end
+            --if explotionTimer > 0 then
+              --  explotionTimer = explotionTimer - dt
+            --end
         end
     end
 end
@@ -157,6 +157,7 @@ function love.draw()
         else
             if napalmColision == 1 then
                 love.graphics.setColor(1, 1, 0)
+                napalmColision = 0
             else
                 love.graphics.setColor(r, g, b, a)
             end
@@ -303,7 +304,7 @@ end
 function handleBulletWound(bullet, werewolf)
     
     if bulletShotgun == true then
-        bullet.dead = false --aca la bala desaparece
+        bullet.dead = false --aca la bala no desaparece
     else
         bullet.dead = true --aca bala desaparece 
     end
