@@ -17,17 +17,7 @@ function Shotgun:new(sprite)
     instance.type = "Shotgun"
     instance.sprite = sprite
 
-    
-
-
-    -- Retornamos la instancia
     return instance
-end
-
--- método de la clase
-function Shotgun:myMethod()
-    print("Property1: " .. self.posicionX)
-    print("Property2: " .. self.posicionY)
 end
 
 --function SilverBullet()

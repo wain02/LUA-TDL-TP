@@ -15,23 +15,13 @@ function Rifle:new(sprite)
     instance.type = "Rifle"
     instance.sprite = sprite
 
-
-    -- Retornamos la instancia
     return instance
 end
-
--- método de la clase
-function Rifle:myMethod()
-    print("Property1: " .. self.posicionX)
-    print("Property2: " .. self.posicionY)
-end
-
 
 function Rifle:restarTiempo(dt)
     self.timer = self.timer - dt
     return self.timer
 end
-
 
 return Rifle, rifleTimer
 
